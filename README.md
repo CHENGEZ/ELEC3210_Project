@@ -10,11 +10,12 @@ package_name
 │   package.xml
 |
 └───include
-│   │   package_name.h
-│   |   ...
+│   └───package_name
+|       | xxxx.h
+│       |...
 |  
 └───src
-    │   package_name.cpp
+    │   xxxx.cpp
     │   ...
 ```
 And `package_name` refers to one of `build_map`, `key_ctrl`, `img_detection`, `follow_yellow_ball` and `judge_area`.
