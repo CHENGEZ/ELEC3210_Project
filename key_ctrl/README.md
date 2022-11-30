@@ -1,18 +1,6 @@
 # Keyborad controller of the robot
 This keyboard controller levaraged the modifed version of the `teleop_twist_keyboard` package from ROS.
-## Usage
-* first make sure relavant packages are properly set up and the necessary modification is made. (Refer to **Setup** section and **Modification** section)
-* run the launch file to run the programm
-```
-roslaunch key_ctrl key_control.launch
-```
-- keys
-    - `s` : toggle enable/disable camera
-    - `d` : toggle enable/disable laser
-    - `u`,`i`,`o`,`j`,`k`,`l`,`m`,`,`,`.` : these 9 keys serves the same purpose as in the original `teleop_twist_keyboard` package. (for moving around)
-    - `q`/`z` : increase/decrease max speeds by 10%
-    - `w`/`x` : increase/decrease only linear speed by 10%
-    - `e`/`c` : increase/decrease only angular speed by 10%
+
 ## Setup
 Install the original `teleop_twist_keyboard` package using the following command:
 ```
@@ -263,3 +251,17 @@ Because the original teleop only supports controlling the robot, but we need two
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
 
     ```
+
+## Usage
+* first make sure relavant packages are properly set up and the necessary modification is made. (Refer to **Setup** section and **Modification** section)
+* run the launch file to run the programm
+```
+roslaunch key_ctrl key_control.launch
+```
+- keys
+    - `s` : toggle enable/disable camera
+    - `d` : toggle enable/disable laser
+    - `u`,`i`,`o`,`j`,`k`,`l`,`m`,`,`,`.` : these 9 keys serves the same purpose as in the original `teleop_twist_keyboard` package. (for moving around)
+    - `q`/`z` : increase/decrease max speeds by 10%
+    - `w`/`x` : increase/decrease only linear speed by 10%
+    - `e`/`c` : increase/decrease only angular speed by 10%
