@@ -18,8 +18,8 @@ void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
     this_linear_spd = (msg.get()->linear).x;
     this_angular_spd = (msg.get()->angular).z;
 
-    enable_laser = (msg.get()->angular).x == 1 ? true : false;
-    enable_camera = (msg.get()->angular).y == 1 ? true : false;
+    enable_camera = (msg.get()->angular).x == 1 ? true : false;
+    enable_laser = (msg.get()->angular).y == 1 ? true : false;
 
     speed_cmd.linear.x = this_linear_spd;
     speed_cmd.angular.z = this_angular_spd;
