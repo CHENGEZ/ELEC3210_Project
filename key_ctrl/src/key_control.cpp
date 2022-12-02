@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 
     speed_cmd_publisher = key_control_node_handle.advertise<geometry_msgs::Twist>("/vrep/cmd_vel", 1);
     camera_enable_publisher = key_control_node_handle.advertise<std_msgs::Bool>("/vrep/camera_switch", 1);
-    laser_enable_publisher = key_control_node_handle.advertise<std_msgs::Bool>("/vrep/laser_witch", 1);
+    laser_enable_publisher = key_control_node_handle.advertise<std_msgs::Bool>("/vrep/laser_switch", 1);
 
     ros::Subscriber subscribe_keyboard = key_control_node_handle.subscribe("/cmd_vel", 1, keyboard_callback);
     ros::spin();
