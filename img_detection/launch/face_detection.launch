@@ -1,0 +1,4 @@
+<launch>
+    <node name="face_detection_run" pkg="img_detection" type="face_detection_run" output="screen">
+	</node>
+</launch>
