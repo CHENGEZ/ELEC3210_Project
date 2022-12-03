@@ -27,7 +27,7 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
 
     // first try to extract out the face
     std::vector<Rect> faces;
-    faceDetection.detectMultiScale(img, faces);
+    faceDetection.detectMultiScale(img, faces,1.1,6);
 
     // show the extracted face in an opencv window
     for (int i = 0; i < faces.size(); ++i)
@@ -45,8 +45,7 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         ROS_INFO_STREAM(faces.size() << " face(s) is/are detected");
 
         string img_person_name;
-        // switch (model->predict(face))
-        switch (model->predict(img))
+        switch (model->predict(face))
         {
         case 0:
             img_person_name = "cartoon";
@@ -70,7 +69,7 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         ROS_INFO_STREAM(img_person_name << " detected in the input image!");
 
         // add marker
-        
+
     }
     else
     {
