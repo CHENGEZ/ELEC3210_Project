@@ -10,6 +10,7 @@ static float this_linear_spd = 0;
 static float this_angular_spd = 0;
 static bool enable_laser = true;
 static bool enable_camera = true;
+static bool manual_control = true;
 
 void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
@@ -20,6 +21,7 @@ void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
 
     enable_camera = (msg.get()->angular).x == 1 ? true : false;
     enable_laser = (msg.get()->angular).y == 1 ? true : false;
+    manual_control = (msg.get()->linear).y == 1 ? true : false;
 
     speed_cmd.linear.x = this_linear_spd;
     speed_cmd.angular.z = this_angular_spd;
@@ -29,7 +31,15 @@ void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
 
     // std::cout << "Linear: " << speed_cmd.linear << std::endl;
     // std::cout << "Angular: " << speed_cmd.angular << std::endl;
-    speed_cmd_publisher.publish(speed_cmd);
+    if (manual_control)
+    {   
+        ROS_INFO_STREAM("In manual control mode");
+        speed_cmd_publisher.publish(speed_cmd);
+    }
+    else
+    {
+        ROS_INFO_STREAM("In auto tracking mode. Turnning of the laser is suggested!");
+    }
     camera_enable_publisher.publish(camera_enable);
     laser_enable_publisher.publish(laser_enable);
 
