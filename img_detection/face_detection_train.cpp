@@ -1,22 +1,44 @@
-#include <opencv2/opencv.hpp>
-#include <stdio.h>
+#include <opencv2/face.hpp>
+// #include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <iostream>
+#include <vector>
+
 using namespace cv;
+using namespace std;
 
+Ptr<face::FaceRecognizer> model = face::LBPHFaceRecognizer::create();
+const string IMG_NAMES[5] = {"cartoon", "european_man", "green_hair", "obama", "smoker"};
+const string PKG_PATH = "/home/cyz/catkin_ws/src/img_detection/";
+const string DATASET_PATH = "/home/cyz/catkin_ws/src/img_detection/image_dataset/";
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        printf("usage: DisplayImage.out <Image_Path>\n");
-        return -1;
+    vector<Mat> images;
+    vector<int> labels;
+    string img_name;
+    Mat img;
+
+    for (int i = 0; i < 5; ++i)
+    {
+        img_name = IMG_NAMES[i];
+        for (int j = 0; j < 5; ++j)
+        {
+            img = imread(DATASET_PATH + img_name + "_" + to_string(j));
+            if (img.data == NULL)
+            {
+                cout << DATASET_PATH + img_name + "_" + to_string(j) << " DNE";
+                exit(0);
+            }
+            images.push_back(img);
+            labels.push_back(i);
+        }
     }
-    Mat image;
-    image = imread(argv[1], 1);
-    if (!image.data) {
-        printf("No image data \n");
-        return -1;
-    }
-    namedWindow("Display Image", WINDOW_AUTOSIZE);
-    imshow("Display Image", image);
-    waitKey(0);
+
+    cout << "start trainning ..." << endl;
+    model->train(images, labels);
+    model->save(PKG_PATH + "model.xml");
+    cout << "finished trainning, model saved at " << PKG_PATH + "model.xml" << endl;
+
     return 0;
 }
