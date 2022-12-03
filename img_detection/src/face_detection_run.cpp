@@ -27,22 +27,19 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
 
     // first try to extract out the face
     std::vector<Rect> faces;
-    faceDetection.detectMultiScale(img, faces,1.1,6);
+    faceDetection.detectMultiScale(img, faces, 1.1, 6);
 
-    // show the extracted face in an opencv window
+    // visualize the extracted face in an opencv window
     for (int i = 0; i < faces.size(); ++i)
     {
-        rectangle(imgcpy, faces[i].tl(), faces[i].br(), Scalar(50,50,255), 3);
+        rectangle(imgcpy, faces[i].tl(), faces[i].br(), Scalar(50, 50, 255), 3);
     }
-    imshow(WINDOW_NAME, imgcpy);
-    waitKey(1);
 
     if (faces.size() >= 1)
     {
         // if there is face extracted, try to classify the face
         cvtColor(img, img, COLOR_BGR2GRAY);
         Mat face = img(faces[0]);
-        ROS_INFO_STREAM(faces.size() << " face(s) is/are detected");
 
         string img_person_name;
         switch (model->predict(face))
@@ -66,15 +63,23 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
             break;
         }
 
-        ROS_INFO_STREAM(img_person_name << " detected in the input image!");
+        // show the detection result
+        putText(imgcpy, img_person_name+" is detected", Point(10,30),FONT_HERSHEY_DUPLEX,1,Scalar(50,50,255),1);
+        imshow(WINDOW_NAME, imgcpy);
+        waitKey(1);
 
         // add marker
-
+        
     }
     else
-    {
+    {   
+        // show the detection result 
+        putText(imgcpy, "No face is detected", Point(10,30),FONT_HERSHEY_DUPLEX,1,Scalar(50,50,255),1);
+        imshow(WINDOW_NAME, imgcpy);
+        waitKey(1);
+
         // if there are no faces extracted, clear any markers on screen
-        ROS_INFO_STREAM("No face is detected in the input image.");
+        
     }
 }
 
@@ -93,7 +98,7 @@ int main(int argc, char **argv)
     }
 
     namedWindow(WINDOW_NAME);
-    
+
     arrow_marker_publisher = face_detection_node_handle.advertise<visualization_msgs::Marker>("visualization_marker", 1);
     img_subcriber = face_detection_node_handle.subscribe("/vrep/image", 1, image_callback);
 
