@@ -1,1 +1,11 @@
 .vscode/
+*.cmake
+devel/
+gtest/
+*configure
+CMakeFiles
+CMakeCache.txt
+*.ini
+catkin*
+img_detection/Makefile
+face_detection_train
