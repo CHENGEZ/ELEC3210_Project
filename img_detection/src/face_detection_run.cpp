@@ -12,7 +12,7 @@ using namespace cv::face;
 using namespace std;
 
 ros::Subscriber img_subcriber;
-ros::Publisher arrow_marker_publisher;
+ros::Publisher marker_publisher;
 Ptr<face::FaceRecognizer> model;
 CascadeClassifier faceDetection;
 const string MODEL_PATH = "/home/cyz/catkin_ws/src/img_detection/model.xml";
@@ -64,22 +64,52 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         }
 
         // show the detection result
-        putText(imgcpy, img_person_name+" is detected", Point(10,30),FONT_HERSHEY_DUPLEX,1,Scalar(50,50,255),1);
+        putText(imgcpy, img_person_name + " is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
+        // calculate img (x,y) position
+        double img_x_pos, img_y_pos;
+        img_x_pos = img_y_pos = 0; // hard code just for testing
+        /* code*/
+
         // add marker
-        
+        visualization_msgs::Marker marker;
+        marker.header.frame_id = "map";
+        marker.header.stamp = ros::Time();
+        marker.id = 0;
+        marker.action = visualization_msgs::Marker::ADD;
+        marker.type = visualization_msgs::Marker::CYLINDER;
+        marker.pose.position.x = img_x_pos;
+        marker.pose.position.y = img_y_pos;
+        marker.pose.position.z = 0;
+        marker.pose.orientation.x = 0.0;
+        marker.pose.orientation.y = 0.0;
+        marker.pose.orientation.z = 0.0;
+        marker.pose.orientation.w = 1.0;
+        marker.color.r = 1.0f;
+        marker.color.g = 0.0f;
+        marker.color.b = 0.0f; // color may be changed (currently red)
+        marker.color.a = 1.0;  // this must be non-zero
+        marker.scale.x = 0.2;
+        marker.scale.y = 0.2;
+        marker.scale.z = 0.2;
+        marker.lifetime = ros::Duration();
+
+        marker_publisher.publish(marker);
     }
     else
-    {   
-        // show the detection result 
-        putText(imgcpy, "No face is detected", Point(10,30),FONT_HERSHEY_DUPLEX,1,Scalar(50,50,255),1);
+    {
+        // show the detection result
+        putText(imgcpy, "No face is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
         // if there are no faces extracted, clear any markers on screen
-        
+        visualization_msgs::Marker marker;
+        marker.id = 0;
+        marker.action = visualization_msgs::Marker::DELETE;
+        marker_publisher.publish(marker);
     }
 }
 
@@ -99,7 +129,7 @@ int main(int argc, char **argv)
 
     namedWindow(WINDOW_NAME);
 
-    arrow_marker_publisher = face_detection_node_handle.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+    marker_publisher = face_detection_node_handle.advertise<visualization_msgs::Marker>("visualization_marker", 1);
     img_subcriber = face_detection_node_handle.subscribe("/vrep/image", 1, image_callback);
 
     ros::spin();
