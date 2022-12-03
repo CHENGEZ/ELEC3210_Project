@@ -7,7 +7,7 @@ Install the original `teleop_twist_keyboard` package using the following command
 sudo apt-get install ros-noetic-teleop-twist-keyboard
 ```
 ## Modification
-Because the original teleop only supports controlling the robot, but we need two additional keys to control whether the camera and laser should be enabled. (We want to disable them in auto tracking mode), so we need to modify their source code to add this new feature.
+Because the original teleop only supports controlling the robot, but we need one additional key to change the control mode (manual/auto) and two additional keys to control whether the camera and laser should be enabled. (We want to disable them in auto tracking mode), so we need to modify their source code to add this new feature.
 - go find the original py file `teleop_twist_keyboard.py` at `/opt/ros/noetic/lib/teleop_twist_keyboard` (This should be the default directory if you did not modify your default installation directory)
 - replace the original py file `teleop_twist_keyboard.py` with the following content:
     ```python
