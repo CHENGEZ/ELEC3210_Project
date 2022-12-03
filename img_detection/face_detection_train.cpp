@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         img_name = IMG_NAMES[i];
         for (int j = 0; j < 5; ++j)
         {
-            img = imread(DATASET_PATH + img_name + "_" + to_string(j));
+            img = imread(DATASET_PATH + img_name + "_" + to_string(j) + ".png", IMREAD_GRAYSCALE);
             if (img.data == NULL)
             {
                 cout << DATASET_PATH + img_name + "_" + to_string(j) << " DNE";
