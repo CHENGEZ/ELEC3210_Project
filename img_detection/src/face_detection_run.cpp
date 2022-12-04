@@ -11,6 +11,8 @@ using namespace cv;
 using namespace cv::face;
 using namespace std;
 
+#define PI 3.141592653589793238
+
 ros::Subscriber img_subcriber;
 ros::Publisher marker_publisher;
 Ptr<face::FaceRecognizer> model;
@@ -72,14 +74,21 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         double img_x_pos, img_y_pos;
         img_x_pos = img_y_pos = 0; // hard code just for testing
         /* code*/
-
+        double tl_x = faces[0].tl().x;
+        double tl_y = faces[0].tl().y;
+        double w = fabs(faces[0].br().x - faces[0].tl().x);
+        double h = fabs(faces[0].br().y - faces[0].tl().y);
+        img_x_pos = 1 / tan(PI / 8 * h / imgcpy.size().width) * 0.5;
+        img_y_pos = (tl_x + w/2) / imgcpy.size().width;
+        
         // add marker
         visualization_msgs::Marker marker;
         marker.header.frame_id = "map";
         marker.header.stamp = ros::Time();
         marker.id = 0;
         marker.action = visualization_msgs::Marker::ADD;
-        marker.type = visualization_msgs::Marker::CYLINDER;
+        marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        marker.text = img_person_name;
         marker.pose.position.x = img_x_pos;
         marker.pose.position.y = img_y_pos;
         marker.pose.position.z = 0;
@@ -91,9 +100,9 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         marker.color.g = 0.0f;
         marker.color.b = 0.0f; // color may be changed (currently red)
         marker.color.a = 1.0;  // this must be non-zero
-        marker.scale.x = 0.2;
-        marker.scale.y = 0.2;
-        marker.scale.z = 0.2;
+        marker.scale.x = 0.5;
+        marker.scale.y = 0.5;
+        marker.scale.z = 0.5;
         marker.lifetime = ros::Duration();
 
         marker_publisher.publish(marker);
