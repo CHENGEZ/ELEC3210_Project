@@ -8,6 +8,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Twist.h>
 
 using namespace cv;
 using namespace cv::face;
@@ -26,8 +27,10 @@ enum AngularDisplacement
     LEFT = 1
 };
 
+float linear_spd, angular_spd;
+
 // ros publisher and subcriber
-ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber;
+ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber, spd_cmd_subcriber;
 ros::Publisher marker_publisher;
 
 // face detection and classification models
@@ -92,6 +95,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
 
         // show the detection result
         putText(imgcpy, img_person_name + " is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
+        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -188,6 +193,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
     {
         // show the detection result
         putText(imgcpy, "No face is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
+        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -216,6 +223,12 @@ void laser_callback(const sensor_msgs::LaserScanConstPtr &msg)
     }
 }
 
+void spd_cmd_callback(const geometry_msgs::TwistConstPtr &msg)
+{
+    linear_spd = msg.get()->linear.x;
+    angular_spd = msg.get()->angular.z;
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "face_detection");
@@ -233,6 +246,7 @@ int main(int argc, char **argv)
     namedWindow(WINDOW_NAME);
 
     marker_publisher = face_detection_node_handle.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+    spd_cmd_subcriber = face_detection_node_handle.subscribe("/vrep/cmd_vel", 1, spd_cmd_callback);
     laser_subcriber = face_detection_node_handle.subscribe("/vrep/scan", 1, laser_callback);
     slam_subcriber = face_detection_node_handle.subscribe("/slam_out_pose", 1, slam_callback);
     img_subcriber = face_detection_node_handle.subscribe("/vrep/image", 1, image_callback);

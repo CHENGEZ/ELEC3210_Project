@@ -33,24 +33,24 @@ void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
     // std::cout << "Angular: " << speed_cmd.angular << std::endl;
     if (manual_control)
     {   
-        ROS_INFO_STREAM("In manual control mode");
+        // ROS_INFO_STREAM("In manual control mode");
         speed_cmd_publisher.publish(speed_cmd);
     }
     else
     {
-        ROS_INFO_STREAM("In auto tracking mode. Turnning of the laser is suggested!");
+        // ROS_INFO_STREAM("In auto tracking mode. Turnning of the laser is suggested!");
     }
     camera_enable_publisher.publish(camera_enable);
     laser_enable_publisher.publish(laser_enable);
 
-    if (enable_laser)
-        ROS_INFO_STREAM("Laser is Enabled");
-    else
-        ROS_INFO_STREAM("Laser is Disabled");
-    if (enable_camera)
-        ROS_INFO_STREAM("Camera is Enabled");
-    else
-        ROS_INFO_STREAM("Camera is Disabled");
+    // if (enable_laser)
+    //     ROS_INFO_STREAM("Laser is Enabled");
+    // else
+    //     ROS_INFO_STREAM("Laser is Disabled");
+    // if (enable_camera)
+    //     ROS_INFO_STREAM("Camera is Enabled");
+    // else
+    //     ROS_INFO_STREAM("Camera is Disabled");
 }
 
 int main(int argc, char **argv)
