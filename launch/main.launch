@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find key_ctrl)/launch/key_control.launch" />
+    <include file="$(find build_map)/launch/build_map.launch" />
+    <include file="$(find img_detection)/launch/face_detection.launch" />
+
+</launch>
