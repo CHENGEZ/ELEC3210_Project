@@ -6,6 +6,8 @@
 
 #include <visualization_msgs/Marker.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/PoseStamped.h>
 
 using namespace cv;
 using namespace cv::face;
@@ -13,12 +15,36 @@ using namespace std;
 
 #define PI 3.141592653589793238
 
-ros::Subscriber img_subcriber;
+enum RoatDir
+{
+    CLK_WISE = 0,
+    ANTI_CLK_WISE = 1
+};
+enum AngularDisplacement
+{
+    RIGHT = 0,
+    LEFT = 1
+};
+
+// ros publisher and subcriber
+ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber;
 ros::Publisher marker_publisher;
+
+// face detection and classification models
 Ptr<face::FaceRecognizer> model;
 CascadeClassifier faceDetection;
+
 const string MODEL_PATH = "/home/cyz/catkin_ws/src/img_detection/model.xml";
 const string WINDOW_NAME = "Camera Image";
+
+// values for marker position calculation
+double robot_x = 0, robot_y = 0;
+double previous_robot_x = 0, previous_robot_y = 0; // for preventing localization failure
+double rotationAngle = 0;
+RoatDir rotationDir = CLK_WISE;
+AngularDisplacement angularDisplacement = LEFT;
+
+static std::vector<float> ranges(902);
 
 void image_callback(const sensor_msgs::ImageConstPtr &msg)
 {
@@ -71,16 +97,68 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         waitKey(1);
 
         // calculate img (x,y) position
-        double img_x_pos, img_y_pos;
-        img_x_pos = img_y_pos = 0; // hard code just for testing
-        /* code*/
-        double tl_x = faces[0].tl().x;
-        double tl_y = faces[0].tl().y;
-        double w = fabs(faces[0].br().x - faces[0].tl().x);
-        double h = fabs(faces[0].br().y - faces[0].tl().y);
-        img_x_pos = 1 / tan(PI / 8 * h / imgcpy.size().width) * 0.5;
-        img_y_pos = (tl_x + w/2) / imgcpy.size().width;
-        
+        double img_x_pos = robot_x, img_y_pos = robot_y; // set as robot position just for testing
+        /* calculation code*/
+        double h = ranges[902 / 2];
+        double h_pixle = 256.0 / tan(PI / 8);
+        float d_signed = (faces[0].br().x + faces[0].tl().x) / 2.0 - 256;
+        angularDisplacement = d_signed > 0 ? RIGHT : LEFT;
+        double d = fabs(d_signed);
+        double theta = atan(d / h_pixle);
+        double distance2img = h / cos(theta);
+        if (rotationDir == ANTI_CLK_WISE && 0 <= rotationAngle && rotationAngle < PI / 2) // top right direction
+        {
+            if (angularDisplacement == LEFT)
+            {
+                img_x_pos = robot_x + distance2img * sin(rotationAngle - theta);
+                img_y_pos = robot_y - distance2img * cos(rotationAngle - theta);
+            }
+            else if (angularDisplacement == RIGHT)
+            {
+                img_x_pos = robot_x + distance2img * cos(PI / 2 - rotationAngle - theta);
+                img_y_pos = robot_y - distance2img * sin(PI / 2 - rotationAngle - theta);
+            }
+        }
+        else if (rotationDir == ANTI_CLK_WISE && PI / 2 <= rotationAngle && rotationAngle <= PI) // top left direction
+        {
+            if (angularDisplacement == LEFT)
+            {
+                img_x_pos = robot_x + distance2img * cos(rotationAngle - PI / 2 - theta);
+                img_y_pos = robot_y + distance2img * sin(rotationAngle - PI / 2 - theta);
+            }
+            else if (angularDisplacement == RIGHT)
+            {
+                img_x_pos = robot_x + distance2img * cos(rotationAngle - PI / 2 + theta);
+                img_y_pos = robot_y + distance2img * sin(rotationAngle - PI / 2 + theta);
+            }
+        }
+        else if (rotationDir == CLK_WISE && 0 <= rotationAngle && rotationAngle < PI / 2) // bottom right direction
+        {
+            if (angularDisplacement == LEFT)
+            {
+                img_x_pos = robot_x - distance2img * sin(rotationAngle + theta);
+                img_y_pos = robot_y - distance2img * cos(rotationAngle + theta);
+            }
+            else if (angularDisplacement == RIGHT)
+            {
+                img_x_pos = robot_x - distance2img * sin(rotationAngle - theta);
+                img_y_pos = robot_y - distance2img * cos(rotationAngle - theta);
+            }
+        }
+        else if (rotationDir == CLK_WISE && PI / 2 <= rotationAngle && rotationAngle <= PI) // bottom left direction
+        {
+            if (angularDisplacement == LEFT)
+            {
+                img_x_pos = robot_x - distance2img * sin(PI - rotationAngle - theta);
+                img_y_pos = robot_y + distance2img * cos(PI - rotationAngle - theta);
+            }
+            else if (angularDisplacement == RIGHT)
+            {
+                img_x_pos = robot_x - distance2img * sin(PI - rotationAngle + theta);
+                img_y_pos = robot_y + distance2img * cos(PI - rotationAngle + theta);
+            }
+        }
+
         // add marker
         visualization_msgs::Marker marker;
         marker.header.frame_id = "map";
@@ -122,6 +200,39 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
     }
 }
 
+void slam_callback(const geometry_msgs::PoseStampedConstPtr &msg)
+{
+    robot_x = msg.get()->pose.position.x;
+    robot_y = msg.get()->pose.position.y;
+    rotationAngle = 2 * acos(msg.get()->pose.orientation.w);
+    rotationDir = msg.get()->pose.orientation.z > 0 ? ANTI_CLK_WISE : CLK_WISE;
+    ROS_INFO_STREAM("robot x is " << robot_x);
+    ROS_INFO_STREAM("robot y is " << robot_y);
+    ROS_INFO_STREAM("robot rotated " << rotationAngle / PI << " pi");
+    // ROS_INFO_STREAM("Quat w is " << msg.get()->pose.orientation.w);
+    // ROS_INFO_STREAM("Quat x is " << msg.get()->pose.orientation.x);
+    // ROS_INFO_STREAM("Quat y is " << msg.get()->pose.orientation.y);
+    // ROS_INFO_STREAM("Quat z is " << msg.get()->pose.orientation.z);
+
+    previous_robot_x = robot_x;
+    previous_robot_y = robot_y;
+}
+
+void laser_callback(const sensor_msgs::LaserScanConstPtr &msg)
+{
+    // ROS_INFO_STREAM("RANGE_MIN: " << msg.get()->range_min);
+    // ROS_INFO_STREAM("RANGE_MAX: " << msg.get()->range_max);
+    // ROS_INFO_STREAM("length of ranges: " << msg.get()->ranges.size());
+    // ROS_INFO_STREAM("ANGLE_MIN: " << msg.get()->angle_min);
+    // ROS_INFO_STREAM("ANGLE_MAX: " << msg.get()->angle_max);
+    // ROS_INFO_STREAM("ANGLE_INCREMENT: " << msg.get()->angle_increment);
+    // ROS_INFO_STREAM("distance to front obstacle: " << (msg.get()->ranges)[msg.get()->ranges.size() / 2]);
+    for (int i = 0; i < 902; ++i)
+    {
+        ranges[i] = msg.get()->ranges[i];
+    }
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "face_detection");
@@ -139,6 +250,8 @@ int main(int argc, char **argv)
     namedWindow(WINDOW_NAME);
 
     marker_publisher = face_detection_node_handle.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+    laser_subcriber = face_detection_node_handle.subscribe("/vrep/scan", 1, laser_callback);
+    slam_subcriber = face_detection_node_handle.subscribe("/slam_out_pose", 1, slam_callback);
     img_subcriber = face_detection_node_handle.subscribe("/vrep/image", 1, image_callback);
 
     ros::spin();
