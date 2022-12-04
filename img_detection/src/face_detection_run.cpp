@@ -26,8 +26,18 @@ enum AngularDisplacement
     RIGHT = 0,
     LEFT = 1
 };
+enum RoomArea
+{
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3
+};
 
+// display variables
 float linear_spd, angular_spd;
+RoomArea roomArea;
+string areas[4] = {"A", "B", "C", "D"};
 
 // ros publisher and subcriber
 ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber, spd_cmd_subcriber;
@@ -50,6 +60,21 @@ static std::vector<float> ranges(902);
 
 void image_callback(const sensor_msgs::ImageConstPtr &msg)
 {
+    // judge area
+    if (robot_x < 4.9)
+    {
+        if (robot_y > -3.4)
+            roomArea = A;
+        else if (robot_y <= -3.4 && robot_y > -6.8)
+            roomArea = B;
+        else if (robot_y <= -6.8)
+            roomArea = C;
+    }
+    else
+    {
+        roomArea = D;
+    }
+
     // convert from sensor_msgs::Image to cv::Mat
     cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     Mat img = ptr->image;
@@ -94,9 +119,11 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         }
 
         // show the detection result
-        putText(imgcpy, img_person_name + " is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
-        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
-        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, img_person_name + " is detected", Point(10, 30), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 50, 255), 1);
+        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
+        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 255, 50), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -194,9 +221,11 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
     else
     {
         // show the detection result
-        putText(imgcpy, "No face is detected", Point(10, 30), FONT_HERSHEY_DUPLEX, 1, Scalar(50, 50, 255), 1);
-        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
-        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_DUPLEX, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "No face is detected", Point(10, 30), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 50, 255), 1);
+        putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
+        putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
+        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 255, 50), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
