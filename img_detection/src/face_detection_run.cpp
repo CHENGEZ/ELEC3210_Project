@@ -110,6 +110,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         double d = fabs(d_signed);
         double theta = atan(d / h_pixle);
         double distance2img = h / cos(theta);
+        int delta_ranges_index = 902 * theta / PI;
+        distance2img = angularDisplacement == LEFT ? ranges[902 / 2 + delta_ranges_index] : ranges[902 / 2 - delta_ranges_index];
         if (rotationDir == ANTI_CLK_WISE && 0 <= rotationAngle && rotationAngle < PI / 2) // top right direction
         {
             if (angularDisplacement == LEFT)
