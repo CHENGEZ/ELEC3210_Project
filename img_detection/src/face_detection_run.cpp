@@ -39,7 +39,6 @@ const string WINDOW_NAME = "Camera Image";
 
 // values for marker position calculation
 double robot_x = 0, robot_y = 0;
-double previous_robot_x = 0, previous_robot_y = 0; // for preventing localization failure
 double rotationAngle = 0;
 RoatDir rotationDir = CLK_WISE;
 AngularDisplacement angularDisplacement = LEFT;
@@ -206,27 +205,11 @@ void slam_callback(const geometry_msgs::PoseStampedConstPtr &msg)
     robot_y = msg.get()->pose.position.y;
     rotationAngle = 2 * acos(msg.get()->pose.orientation.w);
     rotationDir = msg.get()->pose.orientation.z > 0 ? ANTI_CLK_WISE : CLK_WISE;
-    ROS_INFO_STREAM("robot x is " << robot_x);
-    ROS_INFO_STREAM("robot y is " << robot_y);
-    ROS_INFO_STREAM("robot rotated " << rotationAngle / PI << " pi");
-    // ROS_INFO_STREAM("Quat w is " << msg.get()->pose.orientation.w);
-    // ROS_INFO_STREAM("Quat x is " << msg.get()->pose.orientation.x);
-    // ROS_INFO_STREAM("Quat y is " << msg.get()->pose.orientation.y);
-    // ROS_INFO_STREAM("Quat z is " << msg.get()->pose.orientation.z);
-
-    previous_robot_x = robot_x;
-    previous_robot_y = robot_y;
 }
 
 void laser_callback(const sensor_msgs::LaserScanConstPtr &msg)
 {
-    // ROS_INFO_STREAM("RANGE_MIN: " << msg.get()->range_min);
-    // ROS_INFO_STREAM("RANGE_MAX: " << msg.get()->range_max);
-    // ROS_INFO_STREAM("length of ranges: " << msg.get()->ranges.size());
-    // ROS_INFO_STREAM("ANGLE_MIN: " << msg.get()->angle_min);
-    // ROS_INFO_STREAM("ANGLE_MAX: " << msg.get()->angle_max);
-    // ROS_INFO_STREAM("ANGLE_INCREMENT: " << msg.get()->angle_increment);
-    // ROS_INFO_STREAM("distance to front obstacle: " << (msg.get()->ranges)[msg.get()->ranges.size() / 2]);
+
     for (int i = 0; i < 902; ++i)
     {
         ranges[i] = msg.get()->ranges[i];
