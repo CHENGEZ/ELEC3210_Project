@@ -6,11 +6,11 @@ ros::Publisher speed_cmd_publisher;
 ros::Publisher camera_enable_publisher;
 ros::Publisher laser_enable_publisher;
 
-static float this_linear_spd = 0;
-static float this_angular_spd = 0;
-static bool enable_laser = true;
-static bool enable_camera = true;
-static bool manual_control = true;
+float this_linear_spd = 0;
+float this_angular_spd = 0;
+bool enable_laser = true;
+bool enable_camera = true;
+bool manual_control = true;
 
 void keyboard_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
