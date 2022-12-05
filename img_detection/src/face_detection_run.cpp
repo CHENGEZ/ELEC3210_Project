@@ -38,9 +38,11 @@ enum RoomArea
 float linear_spd, angular_spd;
 RoomArea roomArea;
 string areas[4] = {"A", "B", "C", "D"};
+bool manual_control = true;
+string ctrlMode = "manual";
 
 // ros publisher and subcriber
-ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber, spd_cmd_subcriber;
+ros::Subscriber img_subcriber, slam_subcriber, laser_subcriber, spd_cmd_subcriber, keyboard_subcriber;
 ros::Publisher marker_publisher;
 
 // face detection and classification models
@@ -48,7 +50,7 @@ Ptr<face::FaceRecognizer> model;
 CascadeClassifier faceDetection;
 
 const string MODEL_PATH = "/home/cyz/catkin_ws/src/img_detection/model.xml";
-const string WINDOW_NAME = "Camera Image";
+const string WINDOW_NAME = "User Interface";
 
 // values for marker position calculation
 double robot_x = 0, robot_y = 0;
@@ -123,7 +125,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
         putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
         putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
-        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 255, 50), 1);
+        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 100, 0), 1);
+        putText(imgcpy, "control mode: " + ctrlMode, Point(10, 180), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 0, 255), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -225,7 +228,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         putText(imgcpy, "Linear spd: " + to_string(linear_spd), Point(10, 60), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
         putText(imgcpy, "Angular spd: " + to_string(angular_spd), Point(10, 90), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 50, 50), 1);
         putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
-        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(50, 255, 50), 1);
+        putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 100, 0), 1);
+        putText(imgcpy, "control mode: " + ctrlMode, Point(10, 180), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 0, 255), 1);
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -260,6 +264,12 @@ void spd_cmd_callback(const geometry_msgs::TwistConstPtr &msg)
     angular_spd = msg.get()->angular.z;
 }
 
+void key_board_callback(const geometry_msgs::Twist::ConstPtr &msg)
+{
+    manual_control = (msg.get()->linear).y == 1 ? true : false;
+    ctrlMode = manual_control == true ? "manual" : "auto tracking";
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "face_detection");
@@ -281,6 +291,7 @@ int main(int argc, char **argv)
     laser_subcriber = face_detection_node_handle.subscribe("/vrep/scan", 1, laser_callback);
     slam_subcriber = face_detection_node_handle.subscribe("/slam_out_pose", 1, slam_callback);
     img_subcriber = face_detection_node_handle.subscribe("/vrep/image", 1, image_callback);
+    keyboard_subcriber = face_detection_node_handle.subscribe("/cmd_vel", 1, key_board_callback);
 
     ros::spin();
 
