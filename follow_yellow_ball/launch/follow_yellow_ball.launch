@@ -1,0 +1,4 @@
+<launch>
+    <node name="yellow_ball_tracking" pkg="follow_yellow_ball" type="yellow_ball_tracking" output="screen">
+	</node>
+</launch>
