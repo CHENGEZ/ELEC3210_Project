@@ -38,7 +38,7 @@ enum RoomArea
 float linear_spd, angular_spd;
 RoomArea roomArea;
 string areas[4] = {"A", "B", "C", "D"};
-bool manual_control = true;
+bool manual_control = true, enable_laser = true, enable_camera = true;
 string ctrlMode = "manual";
 
 // ros publisher and subcriber
@@ -127,6 +127,15 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
         putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 100, 0), 1);
         putText(imgcpy, "control mode: " + ctrlMode, Point(10, 180), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 0, 255), 1);
+        if (enable_camera && enable_laser)
+            putText(imgcpy, "camera enabled; laser enabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else if (enable_camera && !enable_laser)
+            putText(imgcpy, "camera enabled; laser disabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else if (!enable_camera && enable_laser)
+            putText(imgcpy, "camera disabled; laser enabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else
+            putText(imgcpy, "camera disabled; laser disabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -230,6 +239,15 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         putText(imgcpy, "Robot Pos: (" + to_string(robot_x) + "," + to_string(robot_y) + ")", Point(10, 120), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 0), 1);
         putText(imgcpy, "In area " + areas[roomArea], Point(10, 150), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 100, 0), 1);
         putText(imgcpy, "control mode: " + ctrlMode, Point(10, 180), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(255, 0, 255), 1);
+        if (enable_camera && enable_laser)
+            putText(imgcpy, "camera enabled; laser enabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else if (enable_camera && !enable_laser)
+            putText(imgcpy, "camera enabled; laser disabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else if (!enable_camera && enable_laser)
+            putText(imgcpy, "camera disabled; laser enabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+        else
+            putText(imgcpy, "camera disabled; laser disabled", Point(10, 210), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(100, 100, 100), 1);
+
         imshow(WINDOW_NAME, imgcpy);
         waitKey(1);
 
@@ -266,6 +284,8 @@ void spd_cmd_callback(const geometry_msgs::TwistConstPtr &msg)
 
 void key_board_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
+    enable_camera = (msg.get()->angular).x == 1 ? true : false;
+    enable_laser = (msg.get()->angular).y == 1 ? true : false;
     manual_control = (msg.get()->linear).y == 1 ? true : false;
     ctrlMode = manual_control == true ? "manual" : "auto tracking";
 }

@@ -68,7 +68,7 @@ float pid_cal(PID& pid, float error, double duration)
         pid.integral_part = Integral_Limit;
     output += pid.integral_part;
     pid.last_error = error;
-    cout<<"pid out: "<<output<<endl;
+    // cout<<"pid out: "<<output<<endl;
     return output;
 }
 
@@ -83,19 +83,19 @@ void message_callback(const geometry_msgs::Twist::ConstPtr& msg)
 
 void image_callback(const ImageConstPtr& frame)
 {
-    ROS_INFO("manual_control:%d, enable_laser:%d", manual_control, enable_laser);
+    // ROS_INFO("manual_control:%d, enable_laser:%d", manual_control, enable_laser);
     // ensure the auto mode with the camera on and laser off
-    if (!manual_control)
-    {  
-        if (enable_laser) 
-        {
-            ROS_INFO_STREAM("Auto tracking need to disable the laser");
-            enable_laser = false;
-            std_msgs::Bool laser_disable;
-            laser_disable.data = enable_laser;
-            laser_pub.publish(laser_disable);
-        }
-    }
+    // if (!manual_control)
+    // {  
+    //     if (enable_laser) 
+    //     {
+    //         // ROS_INFO_STREAM("Auto tracking need to disable the laser");
+    //         enable_laser = false;
+    //         std_msgs::Bool laser_disable;
+    //         laser_disable.data = enable_laser;
+    //         laser_pub.publish(laser_disable);
+    //     }
+    // }
 
     cv_bridge::CvImageConstPtr cv_image;
     // convert the ros frame to cv image with new copy
@@ -128,7 +128,7 @@ void image_callback(const ImageConstPtr& frame)
     int num_contours = contours.size();
     if (num_contours < 1) 
     {
-        ROS_INFO_STREAM("no contours found");
+        // ROS_INFO_STREAM("no contours found");
         if (!manual_control) {
             linear_pid.integral_part = 0;
             angular_pid.integral_part = 0;
@@ -167,10 +167,10 @@ void image_callback(const ImageConstPtr& frame)
         }else
             continue;
     }
-    ROS_INFO("num_circles:%d", num_circle);
-    ROS_INFO("circle_edges:%d",circle_edges);
-    if (num_circle == 0)
-        ROS_INFO_STREAM("no circle found");
+    // ROS_INFO("num_circles:%d", num_circle);
+    // ROS_INFO("circle_edges:%d",circle_edges);
+    // if (num_circle == 0)
+    //     ROS_INFO_STREAM("no circle found");
     // else // for debugging
     // {
     //     circle(masked_image, box.center, 5, Scalar(0, 0, 255), -1);
@@ -191,8 +191,8 @@ void image_callback(const ImageConstPtr& frame)
     // onCircle.y = box.center.y + box.size.width / 2;
     // circle(contours_img, onCircle, 5, Scalar(0, 0, 255), -1);
     // imshow("contours", contours_img);
-    imshow("User interface", original_image);
-    waitKey(1);
+    // imshow("User interface", original_image);
+    // waitKey(1);
 
     //control
     float linear_vel, angular_vel;
@@ -202,7 +202,7 @@ void image_callback(const ImageConstPtr& frame)
         float error;
         if (last_tracking_time < 0) // starting auto mode
         {
-            ROS_INFO_STREAM("Started tracking the yellow ball");
+            // ROS_INFO_STREAM("Started tracking the yellow ball");
             linear_pid.kp = L_P;
             linear_pid.ki = L_I;
             linear_pid.kd = L_D;
@@ -214,12 +214,12 @@ void image_callback(const ImageConstPtr& frame)
             duration = 0.001;
         }else  
             duration = (ros::Time::now().toNSec() - last_tracking_time) / 1000000000;
-        ROS_INFO("Duration:%.8f", duration);
+        // ROS_INFO("Duration:%.8f", duration);
         error = 2 * height / 3 - box.center.y;
-        ROS_INFO("Linear error:%.6f", error);
+        // ROS_INFO("Linear error:%.6f", error);
         linear_vel = pid_cal(linear_pid, error, duration);
         error = width / 2 - box.center.x;
-        ROS_INFO("Angular error:%.6f", error);
+        // ROS_INFO("Angular error:%.6f", error);
         std_msgs::Float32 error_msg;
         error_msg.data = error;
         error_pub.publish(error_msg);
@@ -242,8 +242,8 @@ void image_callback(const ImageConstPtr& frame)
     
     if (!manual_control) 
     {
-        ROS_INFO("Linear Velocity:%.3f", linear_vel);
-        ROS_INFO("Angular Velocity:%.3f", angular_vel);
+        // ROS_INFO("Linear Velocity:%.3f", linear_vel);
+        // ROS_INFO("Angular Velocity:%.3f", angular_vel);
         geometry_msgs::Twist tw;
         tw.linear.x = linear_vel;
         tw.angular.z = angular_vel;
