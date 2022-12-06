@@ -7,5 +7,5 @@ CMakeFiles
 CMakeCache.txt
 *.ini
 catkin*
-img_detection/Makefile
+perception/Makefile
 face_detection_train
