@@ -23,12 +23,11 @@ const float Integral_Limit = 50;
 static ros::Publisher tracking_pub;
 static ros::Subscriber tracking_sub;
 static ros::Subscriber msg_sub;
-static ros::Publisher laser_pub;
+// this publisher is for rqt plot to tune the pid parameters
 static ros::Publisher error_pub;
-static bool last_ctrl_mode = 0; // help to determine whether the robot is keep tracking or start tracking
 static bool manual_control = 1;
 static bool enable_laser;
-static double last_tracking_time = -1;
+static double last_tracking_time = -1; // help to determine whether the robot is keep tracking or start tracking
 
 
 struct PID{
@@ -83,19 +82,11 @@ void message_callback(const geometry_msgs::Twist::ConstPtr& msg)
 
 void image_callback(const ImageConstPtr& frame)
 {
-    // ROS_INFO("manual_control:%d, enable_laser:%d", manual_control, enable_laser);
-    // ensure the auto mode with the camera on and laser off
-    // if (!manual_control)
-    // {  
-    //     if (enable_laser) 
-    //     {
-    //         // ROS_INFO_STREAM("Auto tracking need to disable the laser");
-    //         enable_laser = false;
-    //         std_msgs::Bool laser_disable;
-    //         laser_disable.data = enable_laser;
-    //         laser_pub.publish(laser_disable);
-    //     }
-    // }
+    if (manual_control)
+    {
+        last_tracking_time = -1;
+        return ;
+    }
 
     cv_bridge::CvImageConstPtr cv_image;
     // convert the ros frame to cv image with new copy
@@ -257,7 +248,6 @@ int main(int argc ,char* *argv)
     ros::init(argc, argv, "yellow_ball_tracking");
     ros::NodeHandle n;
     tracking_sub = n.subscribe("/vrep/image", 1, image_callback);
-    laser_pub = n.advertise<std_msgs::Bool>("/vrep/laser_switch", 1);
     error_pub = n.advertise<std_msgs::Float32>("tracking/angular_error", 1);
     tracking_pub = n.advertise<geometry_msgs::Twist>("vrep/cmd_vel", 1);
     msg_sub = n.subscribe("/cmd_vel", 1, message_callback);
