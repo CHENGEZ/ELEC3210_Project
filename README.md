@@ -18,7 +18,7 @@ package_name
     │   xxxx.cpp
     │   ...
 ```
-And `package_name` refers to one of `build_map`, `key_ctrl`, `img_detection`, `follow_yellow_ball` and `judge_area`.
+And `package_name` refers to one of `build_map`, `key_ctrl`, `perception`, and `follow_yellow_ball`.
 
 #### The directory structure overall (After you run `catkin_make` under `catkin_ws`) should look like the followings:
 ```
@@ -37,10 +37,8 @@ catkin_ws
     |
     └───key_ctrl
     |
-    └───img_detection
+    └───perception
     |
     └───follow_yellow_ball
-    |
-    └───judge_area
 ```
 Here, the `src` folder is essentially this git repo; and the `catkin_ws` should be the catkin workspace located under your `$HOME`. But the name of your workspace may or may not be `catkin_ws`, I simply followed the convention and chose this name.
