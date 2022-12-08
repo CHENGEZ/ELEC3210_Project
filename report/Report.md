@@ -1,5 +1,9 @@
 # **ELEC3210 Final Project Report**
 
+CHENG Yize 20760620
+
+ZHAO Yuxuan (Your SID)
+
 ## **Overview**
 In this project, we implemented ROS packages for achieving 5 tasks under a simulation environment. The 5 tasks include controlling the robot using the keyboard, building the map and localizing the position of the robot through simultaneous localization and mapping (SLAM), detecting and localizing images on the wall, judging the area of the robot, and following a moving yellow ball in the environment. We merged the image detection package and the area judging package together to form a `perception` package. Overall, when all tasks are launched, the ROS node graph showing all topic communication between nodes is shown in the following figure.
 ![topic communication between nodes](./imgs/rosgraph.png "topic communication between nodes")
@@ -44,14 +48,16 @@ The Perception package is responsible for both the image detection and localizat
     - **Detection**
     
         We want to both detect the existence of one of the five given face images in the view, and also to classify which face is in the current view. The overall idea is to first detect general "faces" in the image (since all 5 images are faces), and then extract out the face area detected from the face detector into a separate classifier to determine exactly which face it is. To detect the faces, we utilized the `haarcascades` from opencv, specifically, the `haarcascade_frontalface_default.xml` model. This model uses a sliding-window approach to detect faces in an image, and hence, one important parameter for this model is `num_of_neighbors`, which is the value used to determine how many neighbors each candidate rectangle should have to retain it. This value defines a size for the "neighborhood of rectangles". A proposed rectangle is retained only if it lies within a neighborhood that is big enough (have at least `num_of_neighbors` many rectangles). Intuitively, the larger this value is, the stricter it is for a positive box to be produced in the output. After some experiments, we discovered that setting `num_of_neighbors` as 6 can produce a decent result with very few false positive output. Then, the detected face area is extracted out from the image and passed to a separate classifier for further classification. For the classifier, we used `LBPHFaceRecognizer` provided by OpenCV. We first prepared a small training dataset containing 15 images (5 image for each face), and wrote a separate source file `perception_train.cpp` to train the classifier and save the model in `perception/model.xml`. Then when the extracted face is passed into this pre-trained classifier, it can correctly output which face is in the input. An example of this idea is illustrated using the example of the 'obama' image as below:
+
         ![detection workflow](./imgs/detection_wkflow.png "detection workflow")
+        
     - **Marking the position of images**
 
         The goal is to map the (x,y) coordinate of the detected face image in the map built by the `build_map` package. The main idea is to estimate the position of the image using the position of the robot itself in addition with an offset value calculated from the information both from the input image and the laser scan data. The position of the robot itself can be easily obtained from the `/slam_out_pose` published by the `build_map` package. The published message is of type `geometry_msgs::PoseStamped`, which include the `Pose` element that include both the (x,y,z) position of the robot, and also the rotation of the robot expressed in quaternion. The core part is to calculate the offset value between the robot position and the image position. We form this as a simple plane geometry problem. The offset value can be calculated using two values: 
         1. the distance $d$ between the robot and the image;
         2. the angle between the orientation of the robot and the connection between the robot and the image $\alpha$;
         
-        We make use of the `ranges` obtained from the laser scan data to obtain $d$. The `ranges` field of the laser scan data is an array of length 902 returning the distances between the robot and the obstacles in 902 different directions. If we define the orientation direction of the robot to be $\frac{\pi}{2}$, The laser scans all directions from $0$ to $\pi$ and keeps the distances in the array `ranges`. It's obvious that we can get the distance between the robot and the obstacle in direction $\theta$ (relative to the robot's orientation) from `ranges` by indexing at $\frac{902}{2} \pm \frac{\theta}{\pi}$, where we "$+$" if the direction is towards the right of the robot orientation, and "$-$" if the direction is towards the left of the robot orientation. An illustration of this idea is shown in the following figure. 
+        We make use of the `ranges` obtained from the laser scan data to obtain $d$. The `ranges` field of the laser scan data is an array of length 902 returning the distances between the robot and the obstacles in 902 different directions. If we define the orientation direction of the robot to be $\frac{\pi}{2}$, The laser scans all directions from $0$ to $\pi$ and keeps the distances in the array `ranges`. It's obvious that we can get the distance between the robot and the obstacle in direction $\theta$ (relative to the robot's orientation) from `ranges` by indexing at $\frac{902}{2} \pm \frac{\theta}{\pi}\times 902$, where we "$+$" if the direction is towards the right of the robot orientation, and "$-$" if the direction is towards the left of the robot orientation. An illustration of this idea is shown in the following figure. 
         
         ![idea illustration](./imgs/ranges_ill.png "idea illustration")
 
@@ -104,5 +110,5 @@ We wrote one launch file for each package separately, where the launch file for 
 - `teleop_twist_keyboard`: http://wiki.ros.org/teleop_twist_keyboard
 - `hector_mapping`: http://wiki.ros.org/hector_mapping
 - `OpenCV`: https://opencv.org/
-- `haarcascade_frontalface_default` (face detection model/CascadeClassifier): https://docs.opencv.org/3.4/d1/de5/classcv_1_1CascadeClassifier.html#aaf8181cb63968136476ec4204ffca498
+- `haarcascade_frontalface_default` (face detection model/CascadeClassifier): https://docs.opencv.org/3.4/d1/de5/classcv_1_1CascadeClassifier.html
 - `LBPHFaceRecognizer`: https://docs.opencv.org/4.x/df/d25/classcv_1_1face_1_1LBPHFaceRecognizer.html
