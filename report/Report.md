@@ -33,6 +33,7 @@ The eventual key control instruction is shown as follows:
 - `q`/`z` : increase/decrease max speeds (both linear and angular) by 10%
 - `w`/`x` : increase/decrease only linear speed by 10%
 - `e`/`c` : increase/decrease only angular speed by 10%
+
 ### **Build Map** (CHENG Yize & ZHAO Yuxuan)
 The `build_map` package leveraged the `hector_mapping` package provided by ROS. We only need to write a launch file to pass the required parameters to the package, and the package can produce a decent SLAM result as long as we do not input an angular velocity that is too high. Also, because we only have the `map_frame` and `base_frame` but not the odometry frame `odom_frame` of the robot, we simply pass `base_link` into both the `base_frame` and `odom_frame`. This package does not require the odometry of the robot to build the map. It publishes the map information through the `/map` topic and the map can be visualized in rviz. Also, we added the rviz node into the launch file of this package to pop up our customized configured rviz canvas, which shows the map, marker, and robot position, once the program is launched. The configuration is saved in `build_map/rviz/rviz.rviz`.
 
@@ -87,6 +88,7 @@ The Perception package is responsible for both the image detection and localizat
 
 ### **Launch File** (CHENG Yize & ZHAO Yuxuan)
 We wrote one launch file for each package separately, where the launch file for the keyboard controller launches both the `teleop_twist_keyboard` package and the `key_ctrl` node, the launch file for the `build_map` package launches both rviz and the `hector_mapping` package, the launch file for the `perception` package launches the `perception_run` node, and the launch file for the `follow_yellow_ball` package launch the `follow_yellow_ball` node. The main launch file `main.launch`, which is the only launch file we need to run to start the program, includes all other launch files and launch all packages at the same time.
+
 ## **Conclusion**
 - **Motivation and Application**
     - This project covers many basic tasks that a real life autonomous robot may actually encounter. It serves as a good simulation and testing method for testing different perception and control algorithms before applying them on real life robots. 
