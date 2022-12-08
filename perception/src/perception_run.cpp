@@ -228,8 +228,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         marker.scale.y = 0.5;
         marker.scale.z = 0.5;
         marker.lifetime = ros::Duration();
-
-        marker_publisher.publish(marker);
+        if (roomArea != D)
+            marker_publisher.publish(marker);
     }
     else
     {
