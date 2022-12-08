@@ -99,7 +99,8 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         Mat face = img(faces[0]);
 
         string img_person_name;
-        switch (model->predict(face))
+        int pred_result = model->predict(face);
+        switch (pred_result)
         {
         case 0:
             img_person_name = "cartoon";
@@ -208,7 +209,7 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         visualization_msgs::Marker marker;
         marker.header.frame_id = "map";
         marker.header.stamp = ros::Time();
-        marker.id = 0;
+        marker.id = pred_result;
         marker.action = visualization_msgs::Marker::ADD;
         marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
         marker.text = img_person_name;
@@ -252,10 +253,10 @@ void image_callback(const sensor_msgs::ImageConstPtr &msg)
         waitKey(1);
 
         // if there are no faces extracted, clear any markers on screen
-        visualization_msgs::Marker marker;
-        marker.id = 0;
-        marker.action = visualization_msgs::Marker::DELETE;
-        marker_publisher.publish(marker);
+        // visualization_msgs::Marker marker;
+        // marker.id = 0;
+        // marker.action = visualization_msgs::Marker::DELETE;
+        // marker_publisher.publish(marker);
     }
 }
 
