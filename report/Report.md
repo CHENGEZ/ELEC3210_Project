@@ -99,6 +99,7 @@ To achieve the task of autonomously tracking the yellow ball, we firstly divide 
 - **Yellow Ball Extraction**
 
     Thanks to the CV bridge package, we could easily convert the ROS camera image to the OpenCV Mat image. Then we used several functions API from OpenCV to get the masked image.
+
     ```C++
     // masked image to show the yellow ball
     Mat original_image = cv_image->image;
@@ -110,13 +111,14 @@ To achieve the task of autonomously tracking the yellow ball, we firstly divide 
     Mat masked_image;
     inRange(hsv, yellow_lower_bound, yellow_upper_bound, masked_image);
     ```
+    
      From the masked image, the contour could be easily found since the yellow color is filtered out. Then the `number of edges` for each contour could further determine whether the contour represents the shape of a circle. If the circle is found, the `fit_Ellipse` function will help to calculate the center and the radius of the circle. The right window of the [picture](#circle_extratcion) below shows a result of correct extraction of the circle information because the center and a point on the circle could be correctly marked.
 
     ![circle_extraction](./imgs/circleDetection.png "Yellow Ball Detection Result")
 
 - **Control Logic**
 
-    With the processed information from the section `yellow ball tracking`, the center of the circle in the image could be corrected to a target location we desired by two `PID` controllers. Two `PID` controllers take responsibility for the linear and angular velocity of the robot to track the yellow ball. As the robot might start to track with a lond distance between the ball and itself, we decide to add a lag compensator to amplify the magnitude of the `PID` controllers' velocity output. And the compensator is only enabled when the radius is not big enough than we expected. So the [picture](#control) below shows the whole control block diagram of our idea.
+    With the processed information from the section `yellow ball extraction`, the center of the circle in the image could be corrected to a target location we desired by two `PID` controllers. Two `PID` controllers take responsibility for the linear and angular velocity of the robot to track the yellow ball. As the robot might start to track with a lond distance between the ball and itself, we decide to add a lag compensator to amplify the magnitude of the `PID` controllers' velocity output. And the compensator is only enabled when the radius is not big enough than we expected. So the [picture](#control) below shows the whole control block diagram of our idea.
 
     ![control](./imgs/controlBlock.png)
 
