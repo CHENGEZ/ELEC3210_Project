@@ -2,7 +2,7 @@
 
 CHENG Yize 20760620
 
-ZHAO Yuxuan (Your SID)
+ZHAO Yu Xuan 20497819
 
 ## **Overview**
 In this project, we implemented ROS packages for achieving 5 tasks under a simulation environment. The 5 tasks include controlling the robot using the keyboard, building the map and localizing the position of the robot through simultaneous localization and mapping (SLAM), detecting and localizing images on the wall, judging the area of the robot, and following a moving yellow ball in the environment. We merged the image detection package and the area judging package together to form a `perception` package. Overall, when all tasks are launched, the ROS node graph showing all topic communication between nodes is shown in the following figure.
@@ -91,6 +91,27 @@ The Perception package is responsible for both the image detection and localizat
     We form our user interface in the perception package, because a lot of important information was either produced in this package or was used in this package by subscribing relevant topics, including the face detection result, the robot position, the linear and angular speed, the area judgement result, the camera and laser switch, and the control mode. This interface will serve as a simple display panel to display the camera output image and the above mentioned information in an OpenCV window.
 
 ### **Follow Yellow Ball** (ZHAO Yuxuan)
+To achieve the task of autonomously tracking the yellow ball, we firstlt divide it into two major sub tasks which are yellow ball extraction and control of the robot.
+- **Yellow Ball Extraction**
+
+    Thanks to the CV bridge package, we could easily convert the ROS camera image information to the OpenCV Mat image. Then we used several functions API from OpenCV to get the masked image. From the masked image, the contour could be easily found since the yellow color is filtered out. Then the `number of edges` for each contour could further determine whether the contour demonstrate the shape of a circle. If the circle is found, the `fit_Ellipse` function will help to calculate the center and the radius of the circle. The right window of the picture below shows a result of right extraction of the circle information because the center and a point on the circle could be correctly labelled.
+
+    ![circle_extraction](./imgs/circleDetection.png "Yellow Ball Detection Result")
+
+- **Control Logic**
+
+    With the prcessed information from the `yellow ball extraction`, the center of the circle in the image could be corrected to a target location we desired by two `PID` controller. Two `PID` controller take responsible for the linear and angular velocity of the robot to track the yellow ball. As the robot might start to track with a lond distance between the ball and itself, I decide to add a lag compensator to amplyfy the maginitude of the `PID` controllers' velocity output. And the compensator is only enabled when the radius is not big enough than we expected. So the picture below shows the whole control block diagram of our idea.
+
+    ![control](./imgs/controlBlock.png)
+
+    The tuning of the parameters for the two `PID` controller 
+    By taking the leverage of the rqt plot plugin, two topics are created to publish the message of the linear and angular error. Hence we could visualize the performance of the set of the parameters. After fine tuning, both error could achieve almost zero value for most of the tracking time. The set of parameters is shown below.
+   
+    |PID Parameters|Kp|Ki|Kd|
+    |:-------|:----:|:----:|:----:|
+    |Linear PID Controller|0.016|0.000|0.020|
+    |Angular PID Controller|0.025|0.000|0.020|
+
 
 ### **Launch File** (CHENG Yize & ZHAO Yuxuan)
 We wrote one launch file for each package separately, where the launch file for the keyboard controller launches both the `teleop_twist_keyboard` package and the `key_ctrl` node, the launch file for the `build_map` package launches both rviz and the `hector_mapping` package, the launch file for the `perception` package launches the `perception_run` node, and the launch file for the `follow_yellow_ball` package launch the `follow_yellow_ball` node. The main launch file `main.launch`, which is the only launch file we need to run to start the program, includes all other launch files and launch all packages at the same time.
@@ -101,9 +122,11 @@ We wrote one launch file for each package separately, where the launch file for 
 - **Limitation**
     - Currently the SLAM package that we use, `hector_mapping`, did not take in any odometry input. So when the angular velocity is too big, the map building process will fail.
     - Because we update our display panel (user interface) in the image callback function, the window can only be updated when there is image information subscribed. In other words, if the camera is switched off, the text information will no longer be updated until the camera is tuned on again. This may affect the user experience.
+    - We could enable the `auto tracking module` when the camear sensor could capture the whole contour of the yellow ball. Otherwise, our package would not work in a normal way. 
 - **Future Work**
     - We may try to conduct experiments to obtain the odometry information of the robot so that we can obtain a more robust SLAM result.
     - We may setup our user interface in another callback function that will always be executed (the image callback function will not be executed when the camera is off). 
+    - We may try to find another way for the robot to achieve the task of the autonomous tracking even though the yellow ball could not be captured by the camera.
 
 
 ## **References**
