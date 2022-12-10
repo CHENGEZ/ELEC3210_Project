@@ -4,7 +4,7 @@ CHENG Yize 20760620
 
 ZHAO Yu Xuan 20497819
 
-Demo Video [Link](link of the demo video in youtube)
+Demo Video [Link](https://youtu.be/YaGylWCOc6c)
 
 GitHub Repo [Link](https://github.com/CHENGEZ/ELEC3210_Project)
 
