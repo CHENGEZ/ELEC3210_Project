@@ -118,17 +118,18 @@ To achieve the task of autonomously tracking the yellow ball, we firstly divide 
 
 - **Control Logic**
 
-    With the processed information from the section `yellow ball extraction`, the center of the circle in the image could be corrected to a target location we desired by two `PID` controllers. Two `PID` controllers take responsibility for the linear and angular velocity of the robot to track the yellow ball. As the robot might start to track with a lond distance between the ball and itself, we decide to add a lag compensator to amplify the magnitude of the `PID` controllers' velocity output. And the compensator is only enabled when the radius is not big enough than we expected. So the [picture](#control) below shows the whole control block diagram of our idea.
+    With the processed information from the section `yellow ball extraction`, the center of the circle in the image could be corrected to a target location we desired by two `PID` controllers. Two `PID` controllers take responsibility for the linear and angular velocity of the robot to track the yellow ball. As the robot might start to track with a long distance between the ball and itself, we decide to add a lag compensator to amplify the magnitude of the `PID` controllers' velocity output. And the compensator is only enabled when the radius is not big enough than we expected. So the [picture](#control) below shows the whole control block diagram of our idea.
 
     ![control](./imgs/controlBlock.png)
 
-    The tuning of the parameters for the two `PID` controller 
-    By taking the leverage of the rqt plot plugin, two topics are created to publish the message of the linear and angular error. Hence we could visualize the performance of the set of the parameters. After fine tuning, both error could achieve almost zero value for most of the tracking time. The set of parameters is shown below.
-   
-    |PID Parameters|Kp|Ki|Kd|
-    |:-------|:----:|:----:|:----:|
-    |Linear PID Controller|0.016|0.000|0.020|
-    |Angular PID Controller|0.025|0.000|0.020|
+    - **The tuning of the parameters for the two `PID` controller**
+
+        By taking the leverage of the rqt plot plugin, two topics are created to publish the message of the linear and angular error. Hence we could visualize the performance of the set of the parameters. After fine tuning, both error could achieve almost zero value for most of the tracking time. The set of parameters is shown below.
+    
+        |PID Parameters|Kp|Ki|Kd|
+        |:-------|:----:|:----:|:----:|
+        |Linear PID Controller|0.016|0.000|0.020|
+        |Angular PID Controller|0.025|0.000|0.020|
 
 
 ### **Launch File** (CHENG Yize & ZHAO Yu Xuan)
