@@ -150,8 +150,8 @@ We wrote one launch file for each package separately, where the launch file for 
 ## **References**
 - `teleop_twist_keyboard`: http://wiki.ros.org/teleop_twist_keyboard
 - `hector_mapping`: http://wiki.ros.org/hector_mapping
-- cv_bridge: http://wiki.ros.org/cv_bridge
-- `OpenCV`: https://opencv.org/'
+- `cv_bridge`: http://wiki.ros.org/cv_bridge
+- `OpenCV`: https://opencv.org/
 - `OpenCV Image Processing`: https://docs.opencv.org/4.x/d2/d96/tutorial_py_table_of_contents_imgproc.html
 - `haarcascade_frontalface_default` (face detection model/CascadeClassifier): https://docs.opencv.org/3.4/d1/de5/classcv_1_1CascadeClassifier.html
 - `LBPHFaceRecognizer`: https://docs.opencv.org/4.x/df/d25/classcv_1_1face_1_1LBPHFaceRecognizer.html
